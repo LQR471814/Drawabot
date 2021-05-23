@@ -1,6 +1,6 @@
 # Drawabot
 
-A bot that draws images.
+*Tired of sucking at online video games that involve drawing? Well fear no more! One can draw any image with a bot that simulates real mouse down movements like a human (it doesn't look anything like a human)*
 
 ### Usage
 
