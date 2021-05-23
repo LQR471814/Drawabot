@@ -1,8 +1,8 @@
-## Drawabot
+# Drawabot
 
 A bot that draws images.
 
-### Usage
+## Usage
 
 1. `[CTRL] + [Click]` where you want to set the image
 2. Input which pass you wish to use `R, G, B, A or V` (V stands for value in the `HSV` color model, it just takes the largest of R, G, and B)
