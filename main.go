@@ -40,7 +40,7 @@ func main() {
 	fmt.Println("[Ctrl] + [Click] to set top left drawing position!\n[Ctrl] + [Shift] + [Q] to exit")
 
 	register_ctrl_click(img, scale)
-	register_alt_click()
+	register_shift_click()
 	register_exit_keydown()
 
 	s := robotgo.EventStart()
@@ -50,8 +50,8 @@ func main() {
 	}
 }
 
-func register_alt_click() {
-	robotgo.EventHook(hook.MouseDown, []string{"alt"}, func(e hook.Event) {
+func register_shift_click() {
+	robotgo.EventHook(hook.MouseDown, []string{"shift"}, func(e hook.Event) {
 		if drawing {
 			start_drawing <- true
 		}
@@ -121,12 +121,13 @@ func draw_manager(img image.Image, startX, startY int) {
 
 func draw(img image.Image, startX, startY int) {
 	fmt.Println("=================================")
+
 	draw_segments := lib.Analyze(img, lib.SetupConditionOptions())
 
 	start_drawing = make(chan bool, 1)
 	drawing = true
 
-	fmt.Println("[Alt] + [Click] to start drawing!")
+	fmt.Println("[Shift] + [Click] to start drawing!")
 	<-start_drawing
 
 	fmt.Println("Drawing...")
@@ -144,9 +145,8 @@ func draw(img image.Image, startX, startY int) {
 		}
 	}
 
-	register_alt_click()
-
 	drawing = false
+	register_shift_click()
 
 	fmt.Println("=================================")
 }
