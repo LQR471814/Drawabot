@@ -1,4 +1,4 @@
-package main
+package lib
 
 import (
 	"image"
@@ -12,7 +12,7 @@ type Segment struct {
 }
 
 type ConditionOptions struct {
-	Pass      rune //? Which pass to compare to "RGBA", pick one letter
+	Pass      rune //? Which pass to compare to "RGBA", pick one letter (if it is 'V' then it will use HSV value comparison)
 	Threshold int  //? The threshold to distinguish between mouse down and up
 	Inverse   bool //? Brighter than threshold = Mouse up
 }
@@ -21,6 +21,7 @@ type ConditionOptions struct {
 func Analyze(img image.Image, options ConditionOptions) [][]Segment {
 	rowsegments := [][]Segment{}
 	height := img.Bounds().Max.Y
+
 	for i := 0; i < height; i++ {
 		rowsegments = append(rowsegments, AnalyzeRow(img, i, options))
 	}
@@ -32,13 +33,22 @@ func AnalyzeRow(img image.Image, row_num int, options ConditionOptions) []Segmen
 	segments := []Segment{}
 	rowlength := img.Bounds().Max.X
 
-	currentStart := 0
+	currentStart := -1 //? Is -1 while hasn't set a start point for the segment
 	for i := 0; i < rowlength; i++ {
 		if AnalyzeCondition(img.At(i, row_num), options) {
-			currentStart = i
+			if currentStart < 0 {
+				currentStart = i
+			}
 		} else {
-			segments = append(segments, Segment{currentStart, i})
+			if currentStart > -1 {
+				segments = append(segments, Segment{currentStart, i})
+				currentStart = -1
+			}
 		}
+	}
+
+	if currentStart > -1 {
+		segments = append(segments, Segment{currentStart, rowlength})
 	}
 
 	return segments
@@ -47,33 +57,33 @@ func AnalyzeRow(img image.Image, row_num int, options ConditionOptions) []Segmen
 //AnalyzeCondition returns true to trigger mouse down
 func AnalyzeCondition(color color.Color, options ConditionOptions) bool {
 	r, g, b, a := color.RGBA()
+	r = r / 255
+	g = g / 255
+	b = b / 255
+	a = a / 255
 
 	switch options.Pass {
 	case 'R':
 		if r > uint32(options.Threshold) {
-			if !options.Inverse {
-				return true
-			}
+			return !options.Inverse
 		}
 	case 'G':
 		if g > uint32(options.Threshold) {
-			if !options.Inverse {
-				return true
-			}
+			return !options.Inverse
 		}
 	case 'B':
 		if b > uint32(options.Threshold) {
-			if !options.Inverse {
-				return true
-			}
+			return !options.Inverse
 		}
 	case 'A':
 		if a > uint32(options.Threshold) {
-			if !options.Inverse {
-				return true
-			}
+			return !options.Inverse
+		}
+	case 'V':
+		if max(int(r), int(g), int(b)) > options.Threshold {
+			return !options.Inverse
 		}
 	}
 
-	return false
+	return options.Inverse
 }

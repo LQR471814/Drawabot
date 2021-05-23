@@ -1,4 +1,4 @@
-package main
+package lib
 
 func max(numbers ...int) int {
 	largest := numbers[0]

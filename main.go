@@ -1,6 +1,7 @@
 package main
 
 import (
+	"drawbot/lib"
 	"flag"
 	"fmt"
 	"image"
@@ -45,7 +46,7 @@ func main() {
 					),
 					int(
 						float64(
-							img.Bounds().Max.X,
+							img.Bounds().Max.Y,
 						)*(*scale),
 					),
 					imaging.Lanczos,
@@ -78,4 +79,20 @@ func loadimage(filename string) image.Image {
 	}
 
 	return img
+}
+
+func draw(img image.Image, startX, startY int) {
+	drawing = true
+
+	draw_segments := lib.Analyze(img, lib.ConditionOptions{Pass: 'V', Threshold: 100, Inverse: true})
+
+	for y, row := range draw_segments {
+		columnLevel := startY + y
+		for _, segment := range row {
+			robotgo.MoveMouse(segment.Start+startX, columnLevel)
+			robotgo.DragSmooth(segment.End+startX, columnLevel, 0.1, 0.1)
+		}
+	}
+
+	robotgo.EventEnd()
 }
